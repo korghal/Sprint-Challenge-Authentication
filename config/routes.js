@@ -30,15 +30,17 @@ function generateToken(user) {
 
 function register(req, res) {
   const newUser = req.body;
+  // Make sure the new user information has all required fields.
   if (newUser.username && newUser.password) {
-    db('users').insert(newUser)
+    newUser.password = bcrypt.hashSync(newUser.password, 14);
+    db('users').insert(newUser) // Add the user into the users table
     .then((ids) => {
       const id = ids[0];
-      db('users').where({id}).first()
+      db('users').where({id}).first() // Select that user from the database....
       .then((user) => {
-        if (user) {
-          const token = generateToken(user);
-          res.status(201).json({id: user.id, token});
+        if (user) { 
+          const token = generateToken(user);  // So we can generate a token based off it and not what was sent in the body.
+          res.status(201).json({id: user.id, token: token});
         }
         else {
           res.status(403).json({errorMessage: `User not registered. Please try again.`})
@@ -58,7 +60,26 @@ function register(req, res) {
 }
 
 function login(req, res) {
-  // implement user login
+  const loginUser = req.body;
+  if (loginUser.username && loginUser.password) {
+    db('users').where('username', loginUser.username)
+    .then((user) => {
+      console.log(user);
+      if (user.length && bcrypt.compareSync(loginUser.password, user[0].password)) {
+        const token = generateToken(user[0]);
+        res.status(200).json({message: `User ${user[0].username} logged in...`, token: token});
+      }
+      else {
+        res.status(403).json({message: 'Username or password not recognized.'});
+      }
+    })
+    .catch((error) => {
+      res.status(500).json({errorMessage: `Server sent an error of ${error}.`});
+    })
+  }
+  else {
+    res.status(400).json({message: 'You need both a username and password to login.'});
+  }
 }
 
 function getJokes(req, res) {
