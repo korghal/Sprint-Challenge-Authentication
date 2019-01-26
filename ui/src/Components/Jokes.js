@@ -19,7 +19,7 @@ class Jokes extends Component {
         if (this.state.jokeList !== undefined) {
             return (
                 <div>
-                    <h2>Users</h2>
+                    <h2>Jokes</h2>
                     <ul>
                     {this.state.jokeList.map(joke => {
                         return <li key={joke.id}>{joke.joke}</li>
