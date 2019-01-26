@@ -64,7 +64,6 @@ function login(req, res) {
   if (loginUser.username && loginUser.password) {
     db('users').where('username', loginUser.username)
     .then((user) => {
-      console.log(user);
       if (user.length && bcrypt.compareSync(loginUser.password, user[0].password)) {
         const token = generateToken(user[0]);
         res.status(200).json({message: `User ${user[0].username} logged in...`, token: token});
